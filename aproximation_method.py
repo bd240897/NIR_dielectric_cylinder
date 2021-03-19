@@ -61,6 +61,10 @@ sqrt = math.sqrt
 atan = math.atan
 ln =  math.log
 atan = math.atan
+exp = cmath.exp
+cos = math.cos
+sin = math.sin
+
 J = sc.jv
 H = sc.hankel1
 def dH(n, x):
@@ -75,12 +79,6 @@ rmn = 10
 dx = 1
 
 # списик для хранения элементов системы 
-# Z1 = np.zeros((1,N),dtype=complex)
-# Z2 = np.zeros((1,N),dtype=complex)
-# Y1 = np.zeros((1,N),dtype=complex)
-# Y2 = np.zeros((1,N),dtype=complex)
-
-
 Z = np.zeros((2*N,2*N),dtype=complex)
 Y = np.zeros((2*N,2*N),dtype=complex)
     
@@ -156,29 +154,49 @@ for m in range(N):
         H1mn = np.dot(tm,tn)*H1u + np.dot(tm,nn)*H1w
         H2mn = -np.dot(tm,tn)*H2u - np.dot(tm,nn)*H2w
             
-        
+        # запись в массив для дальнешего решения 
         Z[m][n] = E1mn
         Z[m][n+N] = E2mn
 
         Z[m+N][n] = H1mn
         Z[m+N][n+N] = H2mn
         
-    #     Z1[0,n] = E1mn 
-    #     Z2[0,n] = E2mn
-       
-    #     Y1[0,n] = H1mn
-    #     Y2[0,n] = H2mn
-       
-    # Z[m][0] = Z1 + Z2  
-    # Y[m][0] = Y1 + Y2
 
+E = np.zeros(2*N, dtype=complex)
+# падающее поле 
+for m in range(N):
+    xn = x[m]
+    zn = z[m]
+    # tm = t[m]
+    # nm = n[m]
+    
+    # cоставляющие полей
+    Eiy = exp(-1j*k2*(xn*cos(phi_i) + zn*sin(phi_i)))
+    Hix = 1/eta2*sin(phi_i) * Eiy
+    Hiz = 1/eta2*cos(phi_i) * Eiy
+    
+    # элементы системы  
+    Ei = Eiy
+    Hi = tm[0]*Hix + tm[1]*Hiz
 
-# # падающее поле 
-# for i in range(N):
-#     xn = x[n]
-#     zn = z[n]
+    # запись в массив для дальнешего решения 
+    E[m] = Ei
+    E[m+N] = Hi
     
-#     Eiy = exp(-1j*k2*(xn*cos(phi_i) + zn*sin(phi_i)))
-    
-#     Hix = 1/eta2*sin(phi_i) * Eiy
-#     Hiy = 1/eta2*cod(phi_i) * Eiy
+   
+# Расчитаем токи
+# тут зашито сразу 2 тока
+I = np.linalg.solve(Z, E)   
+
+# отделим один ток от другого
+j1 = I[:N]
+j2 = I[N:]
+
+# построим эти графики 
+fig = plt.figure(figsize=(8., 6.)) 
+ax = fig.add_subplot(211)   
+ax.plot(phi_circl, abs(j1), color = 'r', label='j1')
+ax.legend()  
+ax2 = fig.add_subplot(212)   
+ax2.plot(phi_circl, abs(j2), color = 'g', label='j2')
+ax2.legend()
