@@ -92,76 +92,99 @@ def graf_I():
     ax.plot(angle_for_grad, I2_real_abs, label='I2_real_abs')
     ax.legend()                         
 
-# graf_I()                                                   
+# graf_I()  
+    
+# ========================================================================                                                 # 
 # 4 - посчитаем поле методом никольского
 
-# Es_list = []
-# Hs_list = []
-# E_list = []
-# H_list = []
-# for phi in phi_circl:
-    
-#     Es = 0
-#     Hs = 0
-#     E = 0
-#     H = 0
-    
-#     def dH(n, x):
-#         return n/x*H(n,x) - H(n+1,x)
-#     def dJ(n, x):
-#         return n/x*J(n,x) - J(n+1,x)
-    
-#     Es = 0
-#     Hs = 0
-#     for n in range(N_harm):
-        
-#         An = (-1)**n
-        
-#         Z2 = J(n,k1*a)*dH(n,k2*a) - eta2/eta1*H(n,k2*a)*dJ(n,k1*a)     
-#         bn = An * (dH(n,k2*a)*J(n,k2*a) - H(n,k2*a)*dJ(n,k2*a))/Z2
-#         cn = An * (-J(n,k1*a)*dJ(n,k2*a) + eta2/eta1*dJ(n,k1*a)*J(n,k2*a))/Z2
+Es_list = []
+Hs_list = []
+Ep_list = []
+Hp_list = []
 
-#         ro = 2*a
-#         # отраженое поле
-#         Es += cn*H(n, k2*ro)*cmath.exp(1j*n*phi)
-#         Hs += 1j/eta2*cn*dH(n, k2*ro)*cmath.exp(1j*n*phi)
+for phi in phi_circl:
+    
+    Es = 0
+    Hs = 0
+    Ep = 0
+    Hp= 0
+       
+    for n in range(N_harm):
         
-#         # прошедшее поле
-#         # E += cn*H(n, k1*ro)*cmath.exp(1j*n*phi)
-#         # H += 1j/eta1*n*dH(n, k1*ro)*cmath.exp(1j*n*phi)
+        def dH(n, x):
+            return n/x*H(n,x) - H(n+1,x)
+        
+        def dJ(n, x):
+            return n/x*J(n,x) - J(n+1,x)
         
         
-#     Es_list.append(Es)
-#     Hs_list.append(Hs)  
-#     # E_list.append(Hs) 
-#     # H_list.append(Hs) 
+        c = dH(n,k1*a)
+        
+        An = (-1)**n
+        
+        Z2 = J(n,k1*a)*dH(n,k2*a) - eta2/eta1*H(n,k2*a)*dJ(n,k1*a)     
+        bn = An * (dH(n,k2*a)*J(n,k2*a) - H(n,k2*a)*dJ(n,k2*a))/Z2
+        cn = An * (-J(n,k1*a)*dJ(n,k2*a) + eta2/eta1*dJ(n,k1*a)*J(n,k2*a))/Z2
+
+        ro = 2*a
+        # отраженое поле
+        Es += cn*H(n, k2*ro)*cmath.exp(1j*n*phi)
+        Hs += 1j/eta2*cn*dH(n, k2*ro)*cmath.exp(1j*n*phi)
+        
+        # прошедшее поле
+        Ep += cn*H(n, k1*ro)*cmath.exp(1j*n*phi)
+        Hp += 1j/eta1*n*dH(n, k1*ro)*cmath.exp(1j*n*phi)
+
+    Es_list.append(Es)
+    Hs_list.append(Hs)  
+    Ep_list.append(Hp) 
+    Hp_list.append(Hp) 
  
-# Es_list_abs = list(map(abs, Es_list))
-# Hs_list_abs = list(map(abs, Hs_list))
-# # E_list_abs = list(map(abs, H_list))
-# # H_list_abs = list(map(abs, H_list))
+Es_list_abs = list(map(abs, Es_list))
+Hs_list_abs = list(map(abs, Hs_list))
+Ep_list_abs = list(map(abs, Ep_list))
+Hp_list_abs = list(map(abs, Hp_list))
     
-# # # обычный график 
-# # fig = plt.figure(figsize=(8., 6.)) 
-# # ax = fig.add_subplot(111)   
-# # # ax.plot(angle_for_grad, Es_list_abs, label='Es_list_abs')
-# # ax.plot(angle_for_grad, Hs_list_abs, label='Hs_list_abs')
-# # ax.legend()  
-  
-# # график круга в полярных координатах
-# fig = plt.figure(figsize=(8., 6.))
-# ax1 = fig.add_subplot(211, projection='polar')
-# ax1.plot(phi_circl, Es_list_abs, label='Es_list_abs')
-# ax1.legend()
+# полярный график
+def graf_E_Nico_polar():
 
-# ax2 = fig.add_subplot(212, projection='polar')
-# ax2.plot(phi_circl, Hs_list_abs, label='Hs_list_abs')
-# ax2.legend()
+    # график круга в полярных координатах
+    fig = plt.figure(figsize=(8., 6.))
+    ax1 = fig.add_subplot(221, projection='polar')
+    ax1.plot(phi_circl, Es_list_abs, color = 'r', label='Es_list_abs')
+    ax1.legend()
+    
+    ax2 = fig.add_subplot(222, projection='polar')
+    ax2.plot(phi_circl, Hs_list_abs, color = 'g',  label='Hs_list_abs')
+    ax2.legend()
+    
+    ax3 = fig.add_subplot(223, projection='polar')
+    ax3.plot(phi_circl, Ep_list_abs, color = 'b',  label='E_list_abs')
+    ax3.legend()
+    
+    ax4 = fig.add_subplot(224, projection='polar')
+    ax4.plot(phi_circl, Hp_list_abs, color = 'y',  label='H_list_abs')
+    ax4.legend()
+    
+graf_E_Nico_polar()
 
-# # ax3 = fig.add_subplot(413, projection='polar')
-# # ax3.plot(phi_circl, E_list_abs, label='E_list_abs')
-# # ax3.legend()
+def graf_E_Nico_liner():
+    # обычный график 
+    fig = plt.figure(figsize=(8., 6.)) 
+    ax = fig.add_subplot(221)   
+    ax.plot(angle_for_grad, Es_list_abs, color = 'r', label='Es_list_abs')
+    ax.legend()  
 
-# # ax4 = fig.add_subplot(414, projection='polar')
-# # ax4.plot(phi_circl, H_list_abs, label='H_list_abs')
-# # ax4.legend()
+    ax2 = fig.add_subplot(222)   
+    ax2.plot(angle_for_grad, Hs_list_abs, color = 'g', label='Hs_list_abs')
+    ax2.legend()
+    
+    ax3 = fig.add_subplot(223)   
+    ax3.plot(angle_for_grad, Ep_list_abs, color = 'b', label='Ep_list_abs')
+    ax3.legend()
+    
+    ax4 = fig.add_subplot(224)   
+    ax4.plot(angle_for_grad, Hp_list_abs, color = 'y', label='Hp_list_abs')
+    ax4.legend()
+    
+graf_E_Nico_liner()
