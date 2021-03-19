@@ -9,7 +9,7 @@ import scipy.special as sc
 import math
 import cmath
 import matplotlib.pyplot as plt 
-
+import numpy as np
 
 # ========================================================================
 ##  1 - входные данные 
@@ -112,7 +112,7 @@ def graf_I_liner():
     ax.plot(phi_circl, I2_real_abs, label='I2')
     ax.legend()
     
-graf_I_liner()   
+# graf_I_liner()   
 
 Es_OUR_list = []
 Hs_OUR_list = []
@@ -135,11 +135,11 @@ for phi in phi_circl:
         j2n = j2[n]
             
         # отраженое поле
-        Es += -k2*eta2*j2n*H(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
+        Es += -k2/4*eta2*j2n*H(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
         Hs += -k2*1j/4*j2n*dH(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
         
         # прошедшее поле
-        Ep += -k1*eta1*j1n*H(n,k1*a)*J(n,k1*ro)*cmath.exp(1j*n*phi)
+        Ep += -k1/4*eta1*j1n*H(n,k1*a)*J(n,k1*ro)*cmath.exp(1j*n*phi)
         Hp += -k1*1j/4*j1n*H(n,k1*a)*dJ(n,k1*ro)*cmath.exp(1j*n*phi)
 
     Es_OUR_list.append(Es)
@@ -180,13 +180,13 @@ def graf_E_polar(phi_graf: list,
     ax4.legend()
     
 # график поля для нашего разложения токов в ряд 
-graf_E_polar(phi_circl,
-            Es_OUR_list_abs,
-            Hs_OUR_list_abs,
-            Ep_OUR_list_abs,
-            Hp_OUR_list_abs,
-            '_OUR'
-            )
+# graf_E_polar(phi_circl,
+#             Es_OUR_list_abs,
+#             Hs_OUR_list_abs,
+#             Ep_OUR_list_abs,
+#             Hp_OUR_list_abs,
+#             '_OUR'
+#             )
 # ========================================================================                                                 # 
 # 4 - посчитаем поле методом никольского на растоянии ro = 2*a
     
@@ -238,13 +238,13 @@ Ep_list_abs = list(map(abs, Ep_list))
 Hp_list_abs = list(map(abs, Hp_list))
     
 # графтк для поля из Никольского
-graf_E_polar(phi_circl,
-            Es_list_abs,
-            Hs_list_abs,
-            Ep_list_abs,
-            Hp_list_abs,
-            '_NIC'
-            )    
+# graf_E_polar(phi_circl,
+#             Es_list_abs,
+#             Hs_list_abs,
+#             Ep_list_abs,
+#             Hp_list_abs,
+#             '_NIC'
+#             )    
     
 def graf_E_liner(phi_graf: list, 
                 Es,
@@ -253,7 +253,7 @@ def graf_E_liner(phi_graf: list,
                 Hp,
                 name: str,
                 ):
-    """Функция для построение графика полей 
+    """Функция для построение графика полей
     в ДЕКАРТОВЫХ координатах"""
     # обычный график 
     fig = plt.figure(figsize=(8., 6.)) 
@@ -273,10 +273,20 @@ def graf_E_liner(phi_graf: list,
     ax4.plot(phi_graf, Hp, color = 'y', label='Hp'+name)
     ax4.legend()
     
-graf_E_liner(phi_circl,
-            Es_list_abs,
-            Hs_list_abs,
-            Ep_list_abs,
-            Hp_list_abs,
-            '_NIC'
-            ) 
+# graf_E_liner(phi_circl,
+#             Es_list_abs,
+#             Hs_list_abs,
+#             Ep_list_abs,
+#             Hp_list_abs,
+#             '_NIC'
+#             ) 
+
+
+# cравним поля 
+print(
+(np.array(Es_list_abs).round(3) == np.array(Es_OUR_list_abs).round(3)).all(),
+(np.array(Hs_list_abs).round(3) == np.array(Hs_OUR_list_abs).round(3)).all(),
+(np.array(Ep_list_abs).round(3) == np.array(Ep_OUR_list_abs).round(3)).all(),
+(np.array(Hp_list_abs).round(3) == np.array(Hp_OUR_list_abs).round(3)).all(),
+)
+  
