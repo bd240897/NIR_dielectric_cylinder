@@ -103,17 +103,7 @@ def graf_I_liner():
     ax.legend()                         
 
 # graf_I_liner()  
-    
-def graf_I_liner():
-    fig = plt.figure(figsize=(8., 6.)) 
-    ax = fig.add_subplot(111, projection='polar')
-    ax = fig.add_subplot(111)   
-    ax.plot(phi_circl, I1_real_abs, label='I1')
-    ax.plot(phi_circl, I2_real_abs, label='I2')
-    ax.legend()
-    
-# graf_I_liner()   
-
+     
 Es_OUR_list = []
 Hs_OUR_list = []
 Ep_OUR_list = []
@@ -282,8 +272,8 @@ def graf_E_liner(phi_graf: list,
 #             ) 
 
 
-# cравним поля 
-print(
+# cравним поля 2 методов
+print('Поля 2-х методов совпадают?',
 (np.array(Es_list_abs).round(3) == np.array(Es_OUR_list_abs).round(3)).all(),
 (np.array(Hs_list_abs).round(3) == np.array(Hs_OUR_list_abs).round(3)).all(),
 (np.array(Ep_list_abs).round(3) == np.array(Ep_OUR_list_abs).round(3)).all(),
