@@ -20,47 +20,17 @@ eta2 = 120*math.pi
 
 # Параметры программы
 a = 1  # радиус круга
-N = 10 # количество точек на круга 
+N = 200 # количество точек на круга 
 # phi_i = 90 # угол падения [град]
-phi_i = math.radians(90) # угол падения [рад]
-
-# ========================================================================
-#  Построение круга
-dphi = 360/N # угловой шаг на круга [град]
-# dphi = 2*math.pi/N_circl # угловой шаг на круга [рад]
-
-phi_circl = []
-x = []
-z = []
-for i in range(N):
-    # текущий угол для круга
-    cur_phi_grad = i*dphi
-    cur_phi_rad = math.radians(cur_phi_grad)
-    
-    # cохраним угол в градусах
-    phi_circl.append(cur_phi_grad)
-    
-    # посчитаем координаты через угол в радианах 
-    x.append(math.cos(cur_phi_rad))
-    z.append(math.sin(cur_phi_rad))
-    
-# построим график круга 
-def circl_graf():
-    fig = plt.figure(figsize=(8., 6.)) 
-    ax = fig.add_subplot(111)   
-    ax.plot(x, z, label='Круг')
-    ax.legend()    
-
-circl_graf()
-
-# 3 - cам ходя расчета 
+phi_i = math.radians(0) # угол падения [рад]
+gamma = 1.781072417990
 
 # замены для удобства 
 pi = math.pi
 sqrt = math.sqrt
 atan = math.atan
-ln =  math.log
-atan = math.atan
+ln =  cmath.log
+atan = cmath.atan
 exp = cmath.exp
 cos = math.cos
 sin = math.sin
@@ -72,43 +42,118 @@ def dH(n, x):
 def dJ(n, x):
     return n/x*J(n,x) - J(n+1,x)
 
-gamma = 1 #TODO
-wmn = 1
-umn = 1
-rmn = 10
-dx = 1
 
+# ========================================================================
+#  Построение круга
+dphi_grad = 360/N # угловой шаг на круга [град]
+dphi_rad =  math.radians(dphi_grad) # угловой шаг на круга [рад]
+dx = 2*a*math.sin(dphi_rad/2)
+delta = dx/2 
+
+phi_circl = []
+x = []
+z = []
+
+for i in range(N):
+    # текущий угол для круга
+    cur_phi_grad = i*dphi_grad
+    cur_phi_rad = i*dphi_rad
+    
+    # cохраним угол в градусах в массив (для графика)
+    phi_circl.append(cur_phi_grad)
+    
+    # посчитаем координаты через угол в радианах 
+    zi = a*sin(cur_phi_rad)
+    xi = a*cos(cur_phi_rad)
+    
+    # упакуем их в массив
+    x.append(xi)
+    z.append(zi)
+    
+# построим график круга 
+def circl_graf():
+    fig = plt.figure(figsize=(8., 6.)) 
+    ax = fig.add_subplot(111)   
+    ax.plot(x, z, label='Круг')
+    ax.legend()    
+
+circl_graf()
+
+# Генерация касательных
+t_ = [0]*N
+for i in range(N):
+    if i == N-1:
+        tx = -(x[0] - x[i])/dx
+        tz = -(z[0] - z[i])/dx
+    else:
+        tx = -(x[i+1] - x[i])/dx
+        tz = -(z[i+1] - z[i])/dx
+    t_[i] = (tx, tz)
+t_ = np.array(t_) # переведем в тип np
+
+# Генерация нормалей
+alph = -90
+alhp_r = math.radians(alph)
+matrix = np.array([[cos(alhp_r), -sin(alhp_r)],[sin(alhp_r), cos(alhp_r)]])
+
+n_ = [0]*N
+for i in range(N):
+    n_[i] = np.dot(matrix, t_[i])
+n_ = np.array(n_) # переведем в тип np    
+
+# координаты центров отрезков
+x_midle = np.zeros(N)
+z_midle = np.zeros(N)
+for i in range(N):
+    if i == N-1:
+        x_midle[i] = (x[0] + x[i])/2
+        z_midle[i] = (z[0] + z[i])/2
+    else:
+        x_midle[i] = (x[i+1] + x[i])/2
+        z_midle[i] = (z[i+1] + z[i])/2       
+
+# ========================================================================
+# 3 - cам ходя расчета 
 # списик для хранения элементов системы 
 Z = np.zeros((2*N,2*N),dtype=complex)
 Y = np.zeros((2*N,2*N),dtype=complex)
     
-tm = tn = np.array([1,2])
-nm = nn = np.array([2,3])
-
-
-
 for m in range(N):
-    xm = x[m]
-    zm = z[m]
-    # tn = t[n]
-    # nn = n[n]
+    xm = x_midle[m]
+    zm = z_midle[m]
+    tm = t_[m]
+    nm = n_[m]
     for n in range(N):
-        xn = x[n]
-        zn = z[n]
-        # tn = t[n]
-        # nn = n[n]
+        xn = x_midle[n]
+        zn = z_midle[n]
+        tn = t_[n]
+        nn = n_[n]
+              
+        # Растояние между началом координат О2 и точкой наблюдений (в ГСК)        
+        x_mO2 = xm - xn
+        z_mO2 = zm - zn
+        
+        # Положим этот вектор на новую СК
+        # Координаты этой точки (в ЛСК)
+        umn = x_mO2*tn[0] + z_mO2*tn[1]
+        wmn = x_mO2*nn[0] + z_mO2*nn[1]
+        
         
         # локальные замены 
-        umn_plus = umn+dx/2  
-        umn_minus = umn-dx/2  
+        xmn = xm - xn
+        zmn = zm - zn
+        r = sqrt(xmn**2 + zmn**2)
+        
+        umn_plus = umn + delta  
+        umn_minus = umn - delta 
         r_minus = sqrt(umn_plus**2 + wmn**2)
         r_plus = sqrt(umn_minus**2 + wmn**2)
         rmn = sqrt(umn**2 + wmn**2)
             
         if n == m:
             # электрическое поле
-            E1y = k1**2*dx*1j/4*(1 + 2*1j/pi*ln(gamma*k1*rmn/2))
-            E2y = k2**2*dx*1j/4*(1 + 2*1j/pi*ln(gamma*k2*rmn/2))
+            E1y = k1**2*dx*1j/4*(1 + 2*1j/pi*ln(gamma*k1*delta/2))
+            E2y = k2**2*dx*1j/4*(1 + 2*1j/pi*ln(gamma*k2*delta/2))
             
             # магнитное поле
             H1u = -1/2
@@ -116,33 +161,29 @@ for m in range(N):
             H1w = H2w = 0
         elif abs(n-m) <= 1:
         
-            # wmn = 
-            # umn = 
-
-                
             # электрчиеское поле
-            E1y = k1**2*1j/4*dx - k1**2/(2*pi) *(2*wmn*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
+            E1y = k1**2*1j/4*delta - k1**2/(2*pi) *(2*wmn*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
             + umn_plus*ln(gamma*k1/2*sqrt(umn_plus**2+wmn**2)) 
-            - umn_minus*ln(gamma*k1/2*sqrt(umn_minus**2+wmn**2)) - dx)
+            - umn_minus*ln(gamma*k1/2*sqrt(umn_minus**2+wmn**2)) - delta)
             
-            E2y = k2**2*1j/4*dx - k2**2/(2*pi) *(2*wmn*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
+            E2y = k2**2*1j/4*delta - k2**2/(2*pi) *(2*wmn*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
             + umn_plus*ln(gamma*k2/2*sqrt(umn_plus**2+wmn**2)) 
-            - umn_minus*ln(gamma*k2/2*sqrt(umn_minus**2+wmn**2)) - dx)  
+            - umn_minus*ln(gamma*k2/2*sqrt(umn_minus**2+wmn**2)) - delta)  
             
             # магнитное поле 
-            H1u = 1j/8*wmn*k1**2*dx + 1/(2*pi)*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
-            H2u = 1j/8*wmn*k2**2*dx + 1/(2*pi)*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
+            H1u = 1j/8*wmn*k1**2*delta + 1/(2*pi)*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
+            H2u = 1j/8*wmn*k2**2*delta + 1/(2*pi)*(atan(umn_plus/wmn) - atan(umn_minus/wmn))
             
             H1w = 1j/4*(H(0,k1*r_minus) - H(0,k1*r_plus))
             H2w = 1j/4*(H(0,k2*r_minus) - H(0,k2*r_plus))
         else:
             # электрчиеское поле
-            E1y = k1**2*1j/4*dx*H(0,k1*rmn)
-            E2y = k2**2*1j/4*dx*H(0,k2*rmn)
+            E1y = k1**2*1j/4*delta*H(0,k1*rmn)
+            E2y = k2**2*1j/4*delta*H(0,k2*rmn)
                
             # магнитное поле     
-            H1u = 1j/4*k1*dx*(wmn/rmn*H(1,k1*rmn))
-            H2u = 1j/4*k2*dx*(wmn/rmn*H(1,k2*rmn))
+            H1u = 1j/4*k1*delta*(wmn/rmn*H(1,k1*rmn))
+            H2u = 1j/4*k2*delta*(wmn/rmn*H(1,k2*rmn))
             
             H1w = 1j/4*(H(0,k1*r_plus) - H(0,k1*r_minus))
             H2w = 1j/4*(H(0,k2*r_plus) - H(0,k2*r_minus))
