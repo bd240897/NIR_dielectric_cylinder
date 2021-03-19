@@ -131,7 +131,6 @@ for phi in phi_circl:
     Hp= 0
        
     for n in range(N_harm):
-        
         j1n = j1[n]
         j2n = j2[n]
             
@@ -225,8 +224,8 @@ for phi in phi_circl:
         Hs += 1j/eta2*cn*dH(n, k2*ro)*cmath.exp(1j*n*phi)
         
         # прошедшее поле
-        Ep += bn*H(n, k1*ro)*cmath.exp(1j*n*phi)
-        Hp += 1j/eta1*bn*dH(n, k1*ro)*cmath.exp(1j*n*phi)
+        Ep += bn*J(n, k1*ro)*cmath.exp(1j*n*phi)
+        Hp += 1j/eta1*bn*dJ(n, k1*ro)*cmath.exp(1j*n*phi)
 
     Es_list.append(Es)
     Hs_list.append(Hs)  
