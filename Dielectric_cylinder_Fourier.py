@@ -136,7 +136,7 @@ for phi in phi_circl:
         j2n = j2[n]
             
         # отраженое поле
-        Es += -k2*eta2*j2n*H(n,k2*ro)*cmath.exp(1j*n*phi)
+        Es += -k2*eta2*j2n*H(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
         Hs += -k2*1j/4*j2n*dH(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
         
         # прошедшее поле
@@ -153,15 +153,16 @@ Hs_OUR_list_abs = list(map(abs, Hs_OUR_list))
 Ep_OUR_list_abs = list(map(abs, Ep_OUR_list))
 Hp_OUR_list_abs = list(map(abs, Hp_OUR_list))
 
-def graf_E_OUR_polar(phi_graf: list, 
+def graf_E_polar(phi_graf: list, 
                      Es,
                      Hs,
                      Ep,
                      Hp,
                      name: str,
                      ):
-
-    # график круга в полярных координатах
+    """Функция для построение графика полей 
+    в ПОЛЯРНЫХ координатах"""
+    
     fig = plt.figure(figsize=(8., 6.))
     ax1 = fig.add_subplot(221, projection='polar')
     ax1.plot(phi_graf, Es, color = 'r', label='Es'+name)
@@ -179,16 +180,14 @@ def graf_E_OUR_polar(phi_graf: list,
     ax4.plot(phi_graf, Hp, color = 'y',  label='Hp'+name)
     ax4.legend()
     
-graf_E_OUR_polar(phi_circl,
-                 Es_OUR_list_abs,
-                 Hs_OUR_list_abs,
-                 Ep_OUR_list_abs,
-                 Hp_OUR_list_abs,
-                 '_OUR'
-                 )
-
-
-
+# график поля для нашего разложения токов в ряд 
+graf_E_polar(phi_circl,
+            Es_OUR_list_abs,
+            Hs_OUR_list_abs,
+            Ep_OUR_list_abs,
+            Hp_OUR_list_abs,
+            '_OUR'
+            )
 # ========================================================================                                                 # 
 # 4 - посчитаем поле методом никольского на растоянии ro = 2*a
     
@@ -239,46 +238,46 @@ Hs_list_abs = list(map(abs, Hs_list))
 Ep_list_abs = list(map(abs, Ep_list))
 Hp_list_abs = list(map(abs, Hp_list))
     
-# полярный график
-def graf_E_Nico_polar():
-
-    # график круга в полярных координатах
-    fig = plt.figure(figsize=(8., 6.))
-    ax1 = fig.add_subplot(221, projection='polar')
-    ax1.plot(phi_circl, Es_list_abs, color = 'r', label='Es')
-    ax1.legend()
+# графтк для поля из Никольского
+graf_E_polar(phi_circl,
+            Es_list_abs,
+            Hs_list_abs,
+            Ep_list_abs,
+            Hp_list_abs,
+            '_NIC'
+            )    
     
-    ax2 = fig.add_subplot(222, projection='polar')
-    ax2.plot(phi_circl, Hs_list_abs, color = 'g',  label='Hs')
-    ax2.legend()
-    
-    ax3 = fig.add_subplot(223, projection='polar')
-    ax3.plot(phi_circl, Ep_list_abs, color = 'b',  label='Ep')
-    ax3.legend()
-    
-    ax4 = fig.add_subplot(224, projection='polar')
-    ax4.plot(phi_circl, Hp_list_abs, color = 'y',  label='Hp')
-    ax4.legend()
-    
-# graf_E_Nico_polar()
-
-def graf_E_Nico_liner():
+def graf_E_liner(phi_graf: list, 
+                Es,
+                Hs,
+                Ep,
+                Hp,
+                name: str,
+                ):
+    """Функция для построение графика полей 
+    в ДЕКАРТОВЫХ координатах"""
     # обычный график 
     fig = plt.figure(figsize=(8., 6.)) 
     ax = fig.add_subplot(221)   
-    ax.plot(angle_for_grad, Es_list_abs, color = 'r', label='Es')
+    ax.plot(phi_graf, Es, color = 'r', label='Es'+name)
     ax.legend()  
 
     ax2 = fig.add_subplot(222)   
-    ax2.plot(angle_for_grad, Hs_list_abs, color = 'g', label='Hs')
+    ax2.plot(phi_graf, Hs, color = 'g', label='Hs'+name)
     ax2.legend()
     
     ax3 = fig.add_subplot(223)   
-    ax3.plot(angle_for_grad, Ep_list_abs, color = 'b', label='Ep')
+    ax3.plot(phi_graf, Ep, color = 'b', label='Ep'+name)
     ax3.legend()
     
     ax4 = fig.add_subplot(224)   
-    ax4.plot(angle_for_grad, Hp_list_abs, color = 'y', label='Hp')
+    ax4.plot(phi_graf, Hp, color = 'y', label='Hp'+name)
     ax4.legend()
     
-# graf_E_Nico_liner()
+graf_E_liner(phi_circl,
+            Es_list_abs,
+            Hs_list_abs,
+            Ep_list_abs,
+            Hp_list_abs,
+            '_NIC'
+            ) 
