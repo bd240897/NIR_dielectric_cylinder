@@ -53,25 +53,35 @@ def graf_circl():
 # для удобства обозначим цилиндрические функции как 
 J = sc.jv
 H = sc.hankel1
-    
+def dH(n, x):
+    return n/x*H(n,x) - H(n+1,x)    
+def dJ(n, x):
+    return n/x*J(n,x) - J(n+1,x)
+
 # харнение значения тока в хависимости от угла наблюдеения на сечении цилиндра
+
+# реальный токи - сумма коэф * exp
 I1_real = []
 I2_real = []
+
+# коэффициенты разложения токо
+j1 = []
+j2 = []
+
 for phi in phi_circl:
     
     I1 = 0
     I2 = 0
     for n in range(N_harm):
         
-        def dH(n, x):
-            return n/x*H(n,x) - H(n+1,x)
-        def dJ(n, x):
-            return n/x*J(n,x) - J(n+1,x)
-        
         An = ((-1)**n)*cmath.exp(1j*n*phi_i)       
         Z = -eta1*J(n,k1*a)*dH(n,k2*a) + eta2*H(n,k2*a)*dJ(n,k1*a)
         j1n = 4*An/(k1*H(n,k1*a)) * (dH(n,k2*a)*J(n,k2*a) - H(n,k2*a)*dJ(n,k2*a))/Z
         j2n = 4*An/(k2*J(n,k2*a)) * (-eta1/eta2*J(n,k1*a)*dJ(n,k2*a) + dJ(n,k1*a)*J(n,k2*a))/Z
+    
+        # запишем коэф разложения токов чтоб потом использовать
+        j1.append(j1n)
+        j2.append(j2n)
     
         I1 += j1n*cmath.exp(1j*n*phi)  
         I2 += j2n*cmath.exp(1j*n*phi) 
@@ -104,48 +114,86 @@ def graf_I_liner():
     
 graf_I_liner()   
 
+Es_OUR_list = []
+Hs_OUR_list = []
+Ep_OUR_list = []
+Hp_OUR_list = []
+
 # 4 - посчитаем поле методом нашего разложения на растоянии ro = 2*a
-# for phi in phi_circl:    
-#     Es = 0
-#     Hs = 0
-#     Ep = 0
-#     Hp= 0
+
+# растояние на котром будем смотреть поле
+ro = 2*a
+
+for phi in phi_circl:    
+    Es = 0
+    Hs = 0
+    Ep = 0
+    Hp= 0
        
-#     for n in range(N_harm):
+    for n in range(N_harm):
         
-#         def dH(n, x):
-#             return n/x*H(n,x) - H(n+1,x)
-        
-#         def dJ(n, x):
-#             return n/x*J(n,x) - J(n+1,x)
+        j1n = j1[n]
+        j2n = j2[n]
             
-#         An = (-1)**n
+        # отраженое поле
+        Es += -k2*eta2*j2n*H(n,k2*ro)*cmath.exp(1j*n*phi)
+        Hs += -k2*1j/4*j2n*dH(n,k2*ro)*J(n,k2*a)*cmath.exp(1j*n*phi)
         
-#         ro = 2*a
-#         # отраженое поле
-#         Es += cn*H(n, k2*ro)*cmath.exp(1j*n*phi)
-#         Hs += 1j/eta2*cn*dH(n, k2*ro)*cmath.exp(1j*n*phi)
-        
-#         # прошедшее поле
-#         Ep += bn*H(n, k1*ro)*cmath.exp(1j*n*phi)
-#         Hp += 1j/eta1*bn*dH(n, k1*ro)*cmath.exp(1j*n*phi)
+        # прошедшее поле
+        Ep += -k1*eta1*j1n*H(n,k1*a)*J(n,k1*ro)*cmath.exp(1j*n*phi)
+        Hp += -k1*1j/4*j1n*H(n,k1*a)*dJ(n,k1*ro)*cmath.exp(1j*n*phi)
 
-#     Es_list.append(Es)
-#     Hs_list.append(Hs)  
-#     Ep_list.append(Ep) 
-#     Hp_list.append(Hp) 
+    Es_OUR_list.append(Es)
+    Hs_OUR_list.append(Hs)  
+    Ep_OUR_list.append(Ep) 
+    Hp_OUR_list.append(Hp) 
  
-# Es_list_abs = list(map(abs, Es_list))
-# Hs_list_abs = list(map(abs, Hs_list))
-# Ep_list_abs = list(map(abs, Ep_list))
-# Hp_list_abs = list(map(abs, Hp_list))
+Es_OUR_list_abs = list(map(abs, Es_OUR_list))
+Hs_OUR_list_abs = list(map(abs, Hs_OUR_list))
+Ep_OUR_list_abs = list(map(abs, Ep_OUR_list))
+Hp_OUR_list_abs = list(map(abs, Hp_OUR_list))
 
+def graf_E_OUR_polar(phi_graf: list, 
+                     Es,
+                     Hs,
+                     Ep,
+                     Hp,
+                     name: str,
+                     ):
 
+    # график круга в полярных координатах
+    fig = plt.figure(figsize=(8., 6.))
+    ax1 = fig.add_subplot(221, projection='polar')
+    ax1.plot(phi_graf, Es, color = 'r', label='Es'+name)
+    ax1.legend()
+    
+    ax2 = fig.add_subplot(222, projection='polar')
+    ax2.plot(phi_graf, Hs, color = 'g',  label='Hs'+name)
+    ax2.legend()
+    
+    ax3 = fig.add_subplot(223, projection='polar')
+    ax3.plot(phi_graf, Ep, color = 'b',  label='Ep'+name)
+    ax3.legend()
+    
+    ax4 = fig.add_subplot(224, projection='polar')
+    ax4.plot(phi_graf, Hp, color = 'y',  label='Hp'+name)
+    ax4.legend()
+    
+graf_E_OUR_polar(phi_circl,
+                 Es_OUR_list_abs,
+                 Hs_OUR_list_abs,
+                 Ep_OUR_list_abs,
+                 Hp_OUR_list_abs,
+                 '_OUR'
+                 )
 
 
 
 # ========================================================================                                                 # 
 # 4 - посчитаем поле методом никольского на растоянии ro = 2*a
+    
+# растояние на котром будем смотреть поле
+ro = 2*a
 
 Es_list = []
 Hs_list = []
@@ -173,7 +221,6 @@ for phi in phi_circl:
         bn = An * (dH(n,k2*a)*J(n,k2*a) - H(n,k2*a)*dJ(n,k2*a))/Z2
         cn = An * (-J(n,k1*a)*dJ(n,k2*a) + eta2/eta1*dJ(n,k1*a)*J(n,k2*a))/Z2
 
-        ro = 2*a
         # отраженое поле
         Es += cn*H(n, k2*ro)*cmath.exp(1j*n*phi)
         Hs += 1j/eta2*cn*dH(n, k2*ro)*cmath.exp(1j*n*phi)
@@ -213,7 +260,7 @@ def graf_E_Nico_polar():
     ax4.plot(phi_circl, Hp_list_abs, color = 'y',  label='Hp')
     ax4.legend()
     
-graf_E_Nico_polar()
+# graf_E_Nico_polar()
 
 def graf_E_Nico_liner():
     # обычный график 
@@ -234,4 +281,4 @@ def graf_E_Nico_liner():
     ax4.plot(angle_for_grad, Hp_list_abs, color = 'y', label='Hp')
     ax4.legend()
     
-graf_E_Nico_liner()
+# graf_E_Nico_liner()
